@@ -17,7 +17,21 @@ app.get("/", (req, res) => {
 });
 
 app.get("/movies", (req, res) => {
-  res.render("index", { movies, BASE_IMG_URL });
+  const keyword = req.query.search?.trim();
+  //透過 query，我們可以取得使用者在搜尋框中輸入的內容
+  const matchedMovies = keyword
+    ? movies.filter((mv) =>
+        Object.values(mv).some((property) => {
+          //使用到 Object.value，將一個物件傳進去時，Object 能夠將所有屬性都印出來；而 some() 的功能在於做條件判斷，只要任何一個條件有符合就能夠通過
+          if (typeof property === "string") {
+            // 如果屬性是字串，就轉小寫並比對，否則不會繼續比對
+            return property.toLowerCase().includes(keyword.toLowerCase());
+          }
+          return false;
+        })
+      )
+    : movies;
+  res.render("index", { movies: matchedMovies, BASE_IMG_URL, keyword });
 });
 
 app.get("/movies/:id", (req, res) => {
